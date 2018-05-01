@@ -1,0 +1,74 @@
+% {{{ LaTeX setup
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[latin1]{inputenc}
+\usepackage{enumerate}
+\usepackage[hang,flushmargin]{footmisc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{relsize}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{fancyvrb}
+\usepackage{placeins}
+
+\newenvironment{restrictlinewidthverb}
+ {\SaveVerbatim{rlwv}}
+ {\endSaveVerbatim
+  \sbox0{\BUseVerbatim{rlwv}}
+  \begingroup\center % don't add indentation
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{\copy0}%
+  \else
+    \copy0
+  \fi
+  \endcenter\endgroup}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\setlength{\oddsidemargin}{0px}
+\setlength{\textwidth}{460px}
+\setlength{\voffset}{-1.5cm}
+\setlength{\textheight}{20cm}
+\setlength{\parindent}{0px}
+\setlength{\parskip}{10pt}
+
+\begin{document}
+% }}}
+% {{{ Title Page
+\begin{titlepage}
+    \topskip0pt
+    \vspace*{\fill}
+    \centering
+    {\scshape\LARGE Final Project: Comparing Generative Methods for Image
+    Generation Tasks\par}
+    \vspace{1cm}
+    {\scshape\Large PSYC 489\par}
+    \vspace{1.5cm}
+    {\Large\itshape Ethan Cheng (\texttt{ethanlc2})\par}
+    \vspace*{\fill}
+\end{titlepage}
+
+\newpage
+% }}}
+
+\section*{}
+% Summary of generative methods and motivation
+% Autoencoders formulation and motivation
+% Variational autoencoder formulation and motivation, results, flaws
+% GANs, motivation and formulation, results, flaws
+% DCGANs, motivation and formulation, results, flaws
+% Results for DCGAN generation for arbitrary images (anime)
+% Further exploration of GAN properties
+\end{document}
