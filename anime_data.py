@@ -11,10 +11,15 @@ from skimage.color import rgb2hsv
 # rather than caching like... 8 gb worth of photos...
 
 class Dataset:
-    def __init__(self, files):
+    def __init__(self, files, images=None, mode="HSV"):
         self.files = files
+        self.images = images
+        self.mode = mode
         self.indices = np.arange(len(self.files))
         np.random.shuffle(self.indices)
+        print("Dataset loaded:", len(files))
+        if images is not None:
+            print(images.shape)
 
     def next_batch(self, batch_size, shuffle=True):
         batch = self.indices[:batch_size]
@@ -31,18 +36,30 @@ class Dataset:
                 self.indices = self.indices[batch_size - len(batch):]
                 batch = np.concatenate((batch, new_part), axis=0)
 
-        imgs = [ scipy.misc.imresize(
-            scipy.ndimage.imread(self.files[i], mode="HSV"),
-            (64,64)
-        ) for i in batch ]
-        return np.array(imgs), new_epoch
+        if self.images is None:
+            imgs = [ scipy.misc.imresize(
+                scipy.ndimage.imread(self.files[i], mode=self.mode),
+                (64,64)
+            ) for i in batch ]
+            return np.array(imgs), new_epoch
+        else:
+            return self.images[ batch ], new_epoch
 
-def get_dataset():
-    subdirs = glob.glob("anime-faces/*")
-    files = reduce(lambda a,b: a+b, [ glob.glob(d+"/*") for d in subdirs ])
-    files = random.sample(files, 50000)
-    anime_dataset = Dataset(files)
-    return anime_dataset
+def get_dataset(low_memory=True, mode="HSV"):
+    # subdirs = glob.glob("anime-faces/*")
+    # files = reduce(lambda a,b: a+b, [ glob.glob(d+"/*") for d in subdirs ])
+    # files = random.sample(files, 50000)
+    files = glob.glob("anime-faces/night/*") + glob.glob("anime-faces/black_background/*")
+    if low_memory:
+        anime_dataset = Dataset(files)
+        return anime_dataset
+    else:
+        images = [ scipy.misc.imresize(
+            scipy.ndimage.imread(f, mode=mode),
+            (64,64)
+        ) for f in files ]
+        anime_dataset = Dataset(files, images=np.array(images))
+        return anime_dataset
 
 # Test next_batch robustitude
 if __name__ == "__main__":

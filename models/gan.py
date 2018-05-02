@@ -75,7 +75,8 @@ class Gan(object):
         with tf.variable_scope("discriminator", reuse=reuse) as scope:
             h1 = layers.fully_connected(x, self.ndims * self.colorspace_dim, activation_fn=tf.nn.relu)
             h2 = layers.fully_connected(h1, self.ndims * self.colorspace_dim, activation_fn=tf.nn.relu)
-            y = layers.fully_connected(h2, 1, activation_fn=None, scope=scope)
+            h3 = layers.fully_connected(h2, self.ndims * self.colorspace_dim, activation_fn=tf.nn.relu)
+            y = layers.fully_connected(h3, 1, activation_fn=None, scope=scope)
             return y
 
     def _discriminator_loss(self, y, y_hat):
@@ -114,7 +115,9 @@ class Gan(object):
                     activation_fn=tf.nn.leaky_relu)
             h2 = layers.fully_connected(h1, self.ndims * self.colorspace_dim,
                     activation_fn=tf.nn.leaky_relu)
-            raw = layers.fully_connected(h2, self.ndims * self.colorspace_dim,
+            h3 = layers.fully_connected(h2, self.ndims * self.colorspace_dim,
+                    activation_fn=tf.nn.leaky_relu)
+            raw = layers.fully_connected(h3, self.ndims * self.colorspace_dim,
                     activation_fn=tf.nn.tanh, scope=scope)
             return raw
 
@@ -166,11 +169,12 @@ class Gan(object):
         z_mus = [np.random.uniform(-1,1,[1,self.n_latent]) for _ in range(400)]
         print("Generated samples")
 
+        num_epochs = 0
         for step in range(num_steps):
             if step % 10 == 0:
                 print("Step:", step)
 
-            batch_x, _ = dataset.next_batch(self.batch_size)
+            batch_x, new_epoch = dataset.next_batch(self.batch_size)
             batch_x = batch_x.reshape((self.batch_size, self.ndims * self.colorspace_dim))
             batch_x = (batch_x - 0.5) / 0.5
             for _ in range(d_steps):
@@ -185,6 +189,8 @@ class Gan(object):
                 self.z_placeholder: batch_z,
             })
 
-            if step % 500 == 0:
-                self.generate_file(z_mus, step)
+            if new_epoch:
+                num_epochs += 1
+                if num_epochs % 5 == 0:
+                    self.generate_file(z_mus, step)
 
