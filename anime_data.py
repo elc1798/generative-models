@@ -3,15 +3,18 @@ from __future__ import print_function
 import glob
 import random
 import scipy.ndimage
+import scipy.misc
 import numpy as np
 from skimage.color import rgb2hsv
 
+# The dataset is extremely large... it's better to read the images on the fly
+# rather than caching like... 8 gb worth of photos...
+
 class Dataset:
-    def __init__(self, images):
-        self.images = images
-        self.indices = np.arange(len(images))
+    def __init__(self, files):
+        self.files = files
+        self.indices = np.arange(len(self.files))
         np.random.shuffle(self.indices)
-        print("Loaded dataset of shape", self.images.shape)
 
     def next_batch(self, batch_size, shuffle=True):
         batch = self.indices[:batch_size]
@@ -19,7 +22,7 @@ class Dataset:
         # print("Sampling indices", batch)
         new_epoch = False
         if len(self.indices) == 0:
-            self.indices = np.arange(len(self.images))
+            self.indices = np.arange(len(self.files))
             np.random.shuffle(self.indices)
             new_epoch = True
             print("New epoch. Reset dataset")
@@ -27,14 +30,18 @@ class Dataset:
                 new_part = self.indices[:batch_size - len(batch)]
                 self.indices = self.indices[batch_size - len(batch):]
                 batch = np.concatenate((batch, new_part), axis=0)
-        return self.images[batch], new_epoch
+
+        imgs = [ scipy.misc.imresize(
+            scipy.ndimage.imread(self.files[i], mode="HSV"),
+            (64,64)
+        ) for i in batch ]
+        return np.array(imgs), new_epoch
 
 def get_dataset():
     subdirs = glob.glob("anime-faces/*")
     files = reduce(lambda a,b: a+b, [ glob.glob(d+"/*") for d in subdirs ])
     files = random.sample(files, 50000)
-    images = [ scipy.ndimage.imread(f, mode="HSV") for f in files ]
-    anime_dataset = Dataset(np.array(images))
+    anime_dataset = Dataset(files)
     return anime_dataset
 
 # Test next_batch robustitude
