@@ -11,11 +11,11 @@ class Simple:
         """
         Initializes a VAE.
 
-        img_dims:   tuple of (image width, image height)
-        cdim:       dimension of colorspace
-        zdim:       dimension of latent space
+        Args:
+            img_dims:   tuple of (image width, image height)
+            cdim:       dimension of colorspace
+            zdim:       dimension of latent space
         """
-
         assert(type(img_dims) in [list, tuple])
         assert(len(img_dims) == 2)
 
@@ -23,7 +23,7 @@ class Simple:
         self.cdim = cdim
         self.zdim = zdim
 
-        self.ndims = img_dims[0] * img_dims[1]
+        self.ndims = img_dims[0] * img_dims[1] * cdim
 
         # Create placeholders
         self.x_placeholder = tf.placeholder(tf.float32, [None, self.ndims])
